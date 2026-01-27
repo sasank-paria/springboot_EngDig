@@ -13,28 +13,25 @@ import java.util.Map;
 @RequestMapping("/journal")
 public class JournalEntryController {
 
-    private Map<Long, JournalEntry> journalEntries = new HashMap<>();
 
     @GetMapping
     public List<JournalEntry> getAll(){
-        return new ArrayList<>(journalEntries.values());
+        return null;
     }
 
     @PostMapping
     public boolean createEntry(@RequestBody JournalEntry myEntry){
-        journalEntries.put(myEntry.getId(), myEntry);
         return true;
     }
 
     @GetMapping("/id/{myid}")
     public JournalEntry getJournalEntryById(@PathVariable Long myid){
-        return journalEntries.get(myid);
+        return null;
     }
 
     @DeleteMapping("/id/{myid}")
     public boolean deleteJournalEntries(@PathVariable Long myid){
-        journalEntries.remove(myid);
         return true;
-    }
+    };
 
 }
