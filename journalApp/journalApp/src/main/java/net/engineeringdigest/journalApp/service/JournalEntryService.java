@@ -25,11 +25,11 @@ public class JournalEntryService {
     }
 
     public JournalEntry findEntryById(ObjectId id){
-        return journalEntryRepository.findById(String.valueOf(id)).orElse(null);
+        return journalEntryRepository.findById(id).orElse(null);
     }
 
     public void deleteEntryById(ObjectId id){
-        journalEntryRepository.deleteById(String.valueOf(id));
+        journalEntryRepository.deleteById(id);
     }
 
 }
