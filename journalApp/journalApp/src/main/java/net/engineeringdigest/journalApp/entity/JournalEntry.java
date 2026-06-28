@@ -1,7 +1,9 @@
 package net.engineeringdigest.journalApp.entity;
 
 
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -12,8 +14,8 @@ import java.util.Date;
 
 //POJO class-> plain old java object
 @Document(collection="journalEntries") //specify the collection name in MongoDB
-@Getter
-@Setter //Because of Lombok annotations, no need to write getters and setters
+@Data
+@NoArgsConstructor // Lombok annotation to generate a no-argument constructor
 public class JournalEntry {
     @Id  //primary key, unique key
     private ObjectId id;

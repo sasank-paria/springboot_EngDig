@@ -2,7 +2,9 @@ package net.engineeringdigest.journalApp.controller;
 
 
 import net.engineeringdigest.journalApp.entity.JournalEntry;
+import net.engineeringdigest.journalApp.entity.User;
 import net.engineeringdigest.journalApp.service.JournalEntryService;
+import net.engineeringdigest.journalApp.service.UserService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,23 +21,30 @@ public class JournalEntryController {
     @Autowired
     private JournalEntryService journalEntryService;
 
+    @Autowired
+    private UserService userService;
 
-    @GetMapping
-    public ResponseEntity<List<JournalEntry>> getAll(){
-        try{
-            return new ResponseEntity<>(journalEntryService.getAllEntries(), HttpStatus.OK);
+
+    @GetMapping("{username}")
+    public ResponseEntity<List<JournalEntry>> getAllJournalEntriesOfUser(@PathVariable String username){
+
+        User user = userService.findByUsername(username);
+        List<JournalEntry> journalEntries = user.getJournalEntries();
+
+        if(journalEntries != null && !journalEntries.isEmpty()){
+            return new ResponseEntity<>(journalEntries,HttpStatus.OK);
         }
-        catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
     }
 
-    @PostMapping
-    public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry myEntry){
+    @PostMapping("{username}")
+    public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry myEntry, @PathVariable String username){
         try{
-            myEntry.setDate(LocalDateTime.now());
-            journalEntryService.saveEntry(myEntry);
-            return new ResponseEntity<>(myEntry, HttpStatus.CREATED);}
+            journalEntryService.saveEntry(myEntry, username);
+            return new ResponseEntity<>(myEntry, HttpStatus.CREATED);
+
+        }
         catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -50,10 +59,10 @@ public class JournalEntryController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping("/id/{myid}")
-    public ResponseEntity<?> deleteJournalEntries(@PathVariable ObjectId myid){
+    @DeleteMapping("/id/{username}/{myid}")
+    public ResponseEntity<?> deleteJournalEntries(@PathVariable ObjectId myid , @PathVariable String username){
         try{
-            journalEntryService.deleteEntryById(myid);
+            journalEntryService.deleteEntryById(myid, username);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         catch (Exception e){
@@ -61,14 +70,20 @@ public class JournalEntryController {
         }
     };
 
-    @PutMapping("/id/{myid}")
-    public ResponseEntity<JournalEntry> updateJournalById(@PathVariable ObjectId myid, @RequestBody JournalEntry myEntry){
-        JournalEntry existingEntry = journalEntryService.findEntryById(myid);
-        if(existingEntry != null){
-            existingEntry.setTitle(myEntry.getTitle());
-            existingEntry.setContent(myEntry.getContent());
-            journalEntryService.saveEntry(existingEntry);
-            return new ResponseEntity<>(existingEntry, HttpStatus.OK);
+
+    @PutMapping("/id/{username}/{myid}")
+    public ResponseEntity<JournalEntry> updateJournalById(
+            @PathVariable ObjectId myid,
+            @RequestBody JournalEntry newEntry,
+            @PathVariable String username
+    ){
+        JournalEntry journalEntryInDb = journalEntryService.findEntryById(myid);
+        if(journalEntryInDb != null){
+            journalEntryInDb.setTitle(newEntry.getTitle() != null ? newEntry.getTitle() : journalEntryInDb.getTitle());
+            journalEntryInDb.setContent(newEntry.getContent() != null ? newEntry.getContent() : journalEntryInDb.getContent());
+            journalEntryInDb.setDate(LocalDateTime.now());
+            journalEntryService.saveEntry(journalEntryInDb, username);
+            return new ResponseEntity<>(journalEntryInDb, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
