@@ -23,7 +23,7 @@ public class JournalEntryService {
     private UserService userService;
 
 
-    @Transactional // Ensure that the entire operation is atomic
+//    @Transactional // Ensure that the entire operation is atomic
     public void saveEntry(JournalEntry journalEntry, String username) {
         try{
             User user = userService.findByUsername(username);
